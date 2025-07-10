@@ -5,4 +5,19 @@ __pycache__/
 # Virtual environment
 .venv/
 
+<<<<<<< HEAD
 #boostlab/src/boostlab/dataset.py
+=======
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Test & coverage artifacts
+.pytest_cache/
+coverage.xml
+
+# IDE/editor folders
+.vscode/
+.idea/
+>>>>>>> 6d47c668386b339ac1973125cda0128892d4c57d
