@@ -27,8 +27,8 @@ dev = [
 
 [tool.mypy]
 # Treat 'src' as a package root for imports
-mypy_path = ["src"]
-ignore_missing_imports = true
-allow_untyped_calls = true
-allow_untyped_defs = true
-disable_error_code = ["operator"]
+mypy_path = ["src", "tests"]               # add ./src and tests to the module search path
+ignore_missing_imports = true     # dont error on missing-stub third-party libs
+allow_untyped_calls = true        # allow calls into code without type hints
+allow_untyped_defs = true         # allow functions without type hints
+disable_error_code = ["operator"] # suppress the "unknown operator" error
