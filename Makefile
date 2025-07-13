@@ -1,4 +1,4 @@
-.PHONY: setup clean
+.PHONY: setup clean precommit
 
 # One-step environment setup: create venv, install runtime + dev deps
 setup:
@@ -10,3 +10,7 @@ setup:
 # Cleanup artifacts
 clean:
 	rm -rf .venv build dist *.egg-info
+
+# Run all pre-commit hooks without committing
+precommit:
+	. .venv/bin/activate && pre-commit run --all-files
