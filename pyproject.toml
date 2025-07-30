@@ -1,29 +1,28 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core>=1.7.0"]
+build-backend = "poetry.core.masonry.api"
 
-[project]
+[tool.poetry]
 name = "boostlab"
 version = "0.1.0"
 description = "A modular XGBoost experimentation framework"
-authors = [
-  { name = "Mikkel Christensen", email = "christensenv.mikkel@gmail.com" }
-]
-readme = "README.md"
-requires-python = ">=3.10"
-dependencies = [
-  "numpy>=1.23",
-  "pandas>=1.5",
-  "xgboost>=1.7",
-]
+authors = ["Mikkel Christensen <christensenv.mikkel@gmail.com>"]
+license = ""
 
-[project.optional-dependencies]
-dev = [
-  "pytest>=7.0",
-  "mypy>=0.10",
-  "ruff>=0.0",
-  "pre-commit>=2.20",
-]
+readme = "README.md"
+[tool.poetry.dependencies]
+python        = ">=3.11,<4.0"
+numpy         = "^2.3.1"
+pandas        = "^2.3.1"
+xgboost       = "^3.0.2"
+scikit-learn  = "^1.7.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest        = "^8.4.1"
+mypy          = "^1.17.0"
+ruff          = "^0.12.4"
+pre-commit    = "^4.2.0"
+
 
 [tool.mypy]
 # Treat 'src' as a package root for imports

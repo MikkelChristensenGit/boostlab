@@ -1,50 +1,100 @@
 import pandas as pd
 
+from abc import ABC, abstractmethod
 
-# --- Strategy functions ---
-def drop_missing(df: pd.DataFrame) -> pd.DataFrame:
-    """Basic drop-rows with any NA."""
-    return df.dropna()
+# Put in __init__:
+# - Anything that won't change between calls to your core method
+# - Algorithm hyper-parameters, column lists, thresholds, external resources
+
+# Pass to apply():
+# - Everything that's different on each invocation
+# - The actual dataset or chunk you need to process
+
+# Guidelines:
+### Constructor (__init__) - "What I am":
+## Immutable configuration
+# - Anything that defines how this object behaves, and won’t change after construction.
+# - Algorithm hyperparameters (e.g. tree depth, learning rate)
+# - Column names or feature lists
+# - File paths, connection strings, external service clients
+## Dependencies
+# - Any collaborators or services this object requires to do its job.
+# - A database or API client
+# - A logger instance
+# - A metrics/monitoring hook
+
+### Public Methods - "What I do":
+## Data Entry Points
+# - Any method that acts on the changing payload (e.g. a new DataFrame, a batch of records)
 
 
-def fill_zero(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
-    """Fill missing values with zero in the given columns."""
-    df = df.copy()
-    for col in columns:
-        df[col] = df[col].fillna(0)
-    return df
+class Preprocessor(ABC):
+    """
+    Base Class for preprocessing the dataset
+    """
+
+    @abstractmethod
+    def apply(self, df: pd.DataFrame) -> pd.DataFrame:
+        """apply method"""
 
 
-def scale_minmax(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
-    """Scale columns to [0,1]."""
-    df = df.copy()
-    for col in columns:
-        col_min, col_max = df[col].min(), df[col].max()
-        df[col] = (df[col] - col_min) / (col_max - col_min)
-    return df
+class DropMissingPreprocessor(Preprocessor):
+    """Drop missing values"""
+
+    def apply(self, df: pd.DataFrame):
+        return df.dropna()
 
 
-# --- Context that applies a chosen strategy ---
-def preprocess(df: pd.DataFrame, strategy: str, **kwargs) -> pd.DataFrame:
-    """Apply the named preprocessor to df."""
+class ZeroFillerPreprocessor(Preprocessor):
+    """Fill missing values with zero in the given columns"""
+
+    def __init__(self, columns: list[str]) -> None:
+        self.columns = columns
+
+    def apply(self, df: pd.DataFrame) -> pd.DataFrame:
+        df = df.copy()
+        for col in self.columns:
+            df[col] = df[col].fillna(0)
+        return df
+
+
+class MinMaxScalerPreprocessor(Preprocessor):
+    """Scale columns to [0,1]"""
+
+    def __init__(self, columns: list[str]) -> None:
+        self.columns = columns
+
+    def apply(self, df: pd.DataFrame) -> pd.DataFrame:
+        df = df.copy()
+        for col in self.columns:
+            col_min, col_max = df[col].min(), df[col].max()
+            df[col] = (df[col] - col_min) / (col_max - col_min)
+        return df
+
+
+class PreprocessingPipeline:
+    """
+    Pipeline
+    name: selects which strategy
+    **cfg (e.g. columns=['age', 'income']) goes directly into the right constructor
+    """
+
     STRATEGIES = {
-        "drop": drop_missing,
-        "zero": fill_zero,
-        "minmax": scale_minmax,
+        "drop": DropMissingPreprocessor,
+        "zero": ZeroFillerPreprocessor,
+        "minmax": MinMaxScalerPreprocessor,
     }
-    func = STRATEGIES[strategy]
-    return func(df, **kwargs)
 
+    @classmethod
+    def build_preprocessor(cls, name: str, **cfg) -> Preprocessor:
+        try:
+            strategy_cls = cls.STRATEGIES[name]
+        except KeyError:
+            raise ValueError(f"Unknown preprocessing strategy: {name!r}")
+        return strategy_cls(**cfg)
 
-# --- Usage example ---
-if __name__ == "__main__":
-    raw = pd.DataFrame(
-        {
-            "age": [25, None, 40],
-            "income": [50000, 60000, None],
-        }
-    )
+    def __init__(self, strategy: str, **cfg) -> None:
+        self.processor = self.build_preprocessor(strategy, **cfg)
 
-    # Choose strategy by name
-    cleaned = preprocess(raw, strategy="zero", columns=["age", "income"])
-    print(cleaned)
+    def run(self, df: pd.DataFrame) -> pd.DataFrame:
+        return self.processor.apply(df)
