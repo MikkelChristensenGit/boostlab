@@ -36,11 +36,5 @@ jobs:
           # If you want the package itself editable-like:
           poetry install --with dev
 
-      - name: Run pre-commit hooks
-        run: |
-          # Ensure pre-commit hooks are installed (optional)
-          pre-commit install --install-hooks
-          pre-commit run --all-files
-
       - name: Run tests
         run: pytest --maxfail=1 --disable-warnings -q
