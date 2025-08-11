@@ -3,7 +3,7 @@ from boostlab.experiment import XGBExperiment
 
 def test_experiment():
     exp = XGBExperiment(
-        path="data/dataset.csv",
+        path="data/classification_dataset.csv",
         params={},
         target_col="target",
         test_size=0.9,

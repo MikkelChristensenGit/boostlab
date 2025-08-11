@@ -1,10 +1,10 @@
 import pandas as pd
-from boostlab.model import XGBModel
+from boostlab.model import XGBClassificationModel
 
 
-def test_xgb_model_fit_predict_eval():
+def test_xgb_classification_model_fit_predict_eval():
     df = pd.read_csv("data/dataset.csv")
-    model = XGBModel(num_rounds=2)
+    model = XGBClassificationModel(num_rounds=2)
     model.fit(df, "target")
     preds = model.predict(df.drop(columns=["target"]))
     assert isinstance(preds, pd.Series)
